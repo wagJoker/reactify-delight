@@ -17,7 +17,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginForm, setLoginForm] = useState({ email: "oleksandr@eventhub.ua", password: "password123" });
   const [registerForm, setRegisterForm] = useState({ email: "", password: "", name: "" });
 
   const handleLogin = (e: React.FormEvent) => {
@@ -28,7 +28,12 @@ export default function LoginPage() {
     }
     // Мок авторизации
     login(
-      { id: "user-1", email: loginForm.email, name: loginForm.email.split("@")[0] },
+      {
+        id: "user-1",
+        email: loginForm.email,
+        name: loginForm.email === "oleksandr@eventhub.ua" ? "Олександр Шевченко" : loginForm.email.split("@")[0],
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=Oleksandr`,
+      },
       "mock-jwt-token"
     );
     toast.success("Успешный вход!");
@@ -77,7 +82,7 @@ export default function LoginPage() {
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="user@example.com"
+                    placeholder="oleksandr@eventhub.ua"
                       value={loginForm.email}
                       onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                     />
@@ -105,7 +110,7 @@ export default function LoginPage() {
                     <Label htmlFor="reg-name">Имя</Label>
                     <Input
                       id="reg-name"
-                      placeholder="Иван Иванов"
+                      placeholder="Тарас Коваленко"
                       value={registerForm.name}
                       onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
                     />

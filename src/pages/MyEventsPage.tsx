@@ -1,19 +1,29 @@
 /**
  * @module pages/MyEventsPage
- * @description Страница «Мои события» — календарный вид событий пользователя.
+ * @description Личный кабинет — управление своими событиями и записями.
+ * Вкладки: организую, участвую. Кнопки создания/редактирования.
  */
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useEventStore } from "@/store/eventStore";
 import { useAuthStore } from "@/store/authStore";
 import { EventCard } from "@/components/shared/EventCard";
+import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Edit, CalendarDays, Mail, User as UserIcon } from "lucide-react";
 
 export default function MyEventsPage() {
   const { events, loadMockData } = useEventStore();
   const { user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadMockData();
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
   }, [loadMockData]);
 
   const organized = useMemo(
@@ -27,7 +37,9 @@ export default function MyEventsPage() {
   );
 
   const renderList = (list: typeof events) =>
-    list.length === 0 ? (
+    isLoading ? (
+      <EventGridSkeleton count={3} />
+    ) : list.length === 0 ? (
       <p className="text-center text-muted-foreground py-12">Пока ничего нет</p>
     ) : (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -39,14 +51,41 @@ export default function MyEventsPage() {
 
   return (
     <div className="page-container animate-fade-in">
+      {/* Профиль пользователя */}
+      <Card className="glass-card mb-8">
+        <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-6">
+          <Avatar className="h-16 w-16 ring-2 ring-primary/30">
+            <AvatarImage src={user?.avatar} alt={user?.name} />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+              {user?.name?.split(" ").map((n) => n[0]).join("") ?? "?"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-center sm:text-left">
+            <h2 className="text-xl font-display font-bold">{user?.name ?? "Гость"}</h2>
+            <p className="text-sm text-muted-foreground flex items-center gap-1 justify-center sm:justify-start">
+              <Mail className="h-3.5 w-3.5" />
+              {user?.email ?? "—"}
+            </p>
+          </div>
+          <Link to="/events/create">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Создать событие
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
       <h1 className="text-3xl font-display font-bold mb-6">Мои события</h1>
 
       <Tabs defaultValue="organized">
         <TabsList>
           <TabsTrigger value="organized">
+            <CalendarDays className="h-4 w-4 mr-1.5" />
             Организую ({organized.length})
           </TabsTrigger>
           <TabsTrigger value="joined">
+            <UserIcon className="h-4 w-4 mr-1.5" />
             Участвую ({joined.length})
           </TabsTrigger>
         </TabsList>

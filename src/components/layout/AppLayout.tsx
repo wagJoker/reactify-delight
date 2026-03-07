@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, LogOut, Plus, List, HelpCircle, LayoutDashboard } from "lucide-react";
+import { CalendarDays, LogOut, Plus, List, HelpCircle, LayoutDashboard, UsersRound } from "lucide-react";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
 export function AppLayout() {
@@ -19,6 +19,7 @@ export function AppLayout() {
     { to: "/events", label: "События", icon: List },
     { to: "/events/create", label: "Создать", icon: Plus },
     { to: "/my-events", label: "Мои события", icon: CalendarDays },
+    { to: "/users", label: "Пользователи", icon: UsersRound },
     { to: "/help", label: "Помощь", icon: HelpCircle },
   ];
 

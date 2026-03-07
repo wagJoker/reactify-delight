@@ -1,14 +1,16 @@
 /**
  * @module pages/EventDetailsPage
- * @description Страница деталей события с возможностью присоединения/выхода.
+ * @description Страница деталей события с возможностью записи, редактирования и skeleton loader.
  */
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEventStore } from "@/store/eventStore";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, MapPin, Users, ArrowLeft, Trash2, Edit } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CalendarDays, MapPin, Users, ArrowLeft, Trash2, Edit, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 const categoryLabels: Record<string, string> = {
@@ -20,11 +22,44 @@ const categoryLabels: Record<string, string> = {
   other: "Другое",
 };
 
+function DetailsSkeleton() {
+  return (
+    <div className="page-container animate-fade-in max-w-3xl space-y-6">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-9 w-2/3" />
+      <Card className="glass-card">
+        <CardContent className="pt-6 space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-3/4" />
+          <div className="grid gap-3 sm:grid-cols-3 pt-2">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="h-5 w-28" />
+          </div>
+        </CardContent>
+      </Card>
+      <div className="flex gap-3">
+        <Skeleton className="h-10 w-40" />
+      </div>
+    </div>
+  );
+}
+
 export default function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { events, joinEvent, leaveEvent, deleteEvent } = useEventStore();
+  const { events, joinEvent, leaveEvent, deleteEvent, loadMockData } = useEventStore();
   const { user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadMockData();
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [loadMockData]);
+
+  if (isLoading) return <DetailsSkeleton />;
 
   const event = events.find((e) => e.id === id);
 
@@ -56,13 +91,13 @@ export default function EventDetailsPage() {
       return;
     }
     joinEvent(event.id, user.id);
-    toast.success("Вы присоединились к событию!");
+    toast.success("Вы записались на событие!");
   };
 
   const handleLeave = () => {
     if (!user) return;
     leaveEvent(event.id, user.id);
-    toast.info("Вы покинули событие");
+    toast.info("Вы отменили запись");
   };
 
   const handleDelete = () => {
@@ -116,11 +151,13 @@ export default function EventDetailsPage() {
           {!isOrganizer && (
             isJoined ? (
               <Button variant="outline" onClick={handleLeave}>
-                Покинуть событие
+                <UserPlus className="h-4 w-4 mr-2" />
+                Отменить запись
               </Button>
             ) : (
               <Button onClick={handleJoin} disabled={spotsLeft <= 0}>
-                {spotsLeft <= 0 ? "Мест нет" : "Присоединиться"}
+                <UserPlus className="h-4 w-4 mr-2" />
+                {spotsLeft <= 0 ? "Мест нет" : "Записаться на событие"}
               </Button>
             )
           )}

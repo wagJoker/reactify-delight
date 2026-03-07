@@ -19,6 +19,7 @@ const EventsListPage = lazy(() => import("@/pages/EventsListPage"));
 const EventDetailsPage = lazy(() => import("@/pages/EventDetailsPage"));
 const CreateEventPage = lazy(() => import("@/pages/CreateEventPage"));
 const MyEventsPage = lazy(() => import("@/pages/MyEventsPage"));
+const UsersPage = lazy(() => import("@/pages/UsersPage"));
 const HelpPage = lazy(() => import("@/pages/HelpPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/events/:id" element={<EventDetailsPage />} />
               <Route path="/events/:id/edit" element={<CreateEventPage />} />
               <Route path="/my-events" element={<MyEventsPage />} />
+              <Route path="/users" element={<UsersPage />} />
               <Route path="/help" element={<HelpPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

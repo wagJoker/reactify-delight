@@ -1,13 +1,17 @@
 /**
  * @module components/shared/EventCard
- * @description Карточка события для отображения в списке.
+ * @description Карточка события с эффектами hover и кнопкой записи.
  * Следует SRP — только отображение данных события.
  */
 import { Link } from "react-router-dom";
 import type { IEvent } from "@/types/event";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, MapPin, Users, UserPlus } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { useEventStore } from "@/store/eventStore";
+import { toast } from "sonner";
 
 interface EventCardProps {
   event: IEvent;
@@ -23,14 +27,41 @@ const categoryLabels: Record<string, string> = {
 };
 
 export function EventCard({ event }: EventCardProps) {
+  const { user } = useAuthStore();
+  const { joinEvent, leaveEvent } = useEventStore();
   const spotsLeft = event.maxParticipants - event.participants.length;
+  const isJoined = user ? event.participants.includes(user.id) : false;
+  const isOrganizer = user?.id === event.organizerId;
+
+  const handleRegister = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast.error("Войдите в аккаунт для записи");
+      return;
+    }
+    if (isJoined) {
+      leaveEvent(event.id, user.id);
+      toast.info("Вы отменили запись");
+    } else {
+      if (spotsLeft <= 0) {
+        toast.error("Нет свободных мест");
+        return;
+      }
+      joinEvent(event.id, user.id);
+      toast.success("Вы записались на событие!");
+    }
+  };
 
   return (
     <Link to={`/events/${event.id}`} className="block group">
-      <Card className="glass-card h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+      <Card className="glass-card h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-primary/30 hover:bg-card/95 relative overflow-hidden">
+        {/* Gradient accent on hover */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-lg font-display leading-tight group-hover:text-primary transition-colors">
+            <CardTitle className="text-lg font-display leading-tight group-hover:text-primary transition-colors duration-200">
               {event.title}
             </CardTitle>
             <Badge variant="secondary" className="shrink-0 text-xs">
@@ -61,6 +92,20 @@ export function EventCard({ event }: EventCardProps) {
               )}
             </span>
           </div>
+
+          {/* Кнопка записи */}
+          {!isOrganizer && (
+            <Button
+              size="sm"
+              variant={isJoined ? "outline" : "default"}
+              className="w-full mt-2 transition-all duration-200"
+              onClick={handleRegister}
+              disabled={!isJoined && spotsLeft <= 0}
+            >
+              <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+              {isJoined ? "Отменить запись" : spotsLeft <= 0 ? "Мест нет" : "Записаться"}
+            </Button>
+          )}
         </CardContent>
       </Card>
     </Link>

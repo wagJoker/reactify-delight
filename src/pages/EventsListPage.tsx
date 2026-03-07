@@ -1,10 +1,11 @@
 /**
  * @module pages/EventsListPage
- * @description Страница со списком событий с фильтрацией и поиском.
+ * @description Страница со списком событий с фильтрацией, поиском и skeleton loader.
  */
 import { useEffect, useMemo, useState } from "react";
 import { useEventStore } from "@/store/eventStore";
 import { EventCard } from "@/components/shared/EventCard";
+import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
@@ -24,9 +25,12 @@ export default function EventsListPage() {
   const { events, loadMockData } = useEventStore();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadMockData();
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
   }, [loadMockData]);
 
   const filtered = useMemo(() => {
@@ -75,7 +79,9 @@ export default function EventsListPage() {
       </div>
 
       {/* Grid */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <EventGridSkeleton count={6} />
+      ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <p className="text-lg">Событий не найдено</p>
           <p className="text-sm mt-1">Попробуйте изменить фильтры</p>

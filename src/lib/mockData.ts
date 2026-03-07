@@ -22,11 +22,11 @@ const titles = [
 ];
 
 const locations = [
-  "Москва, Технопарк",
-  "Санкт-Петербург, Лофт",
+  "Київ, UNIT.City",
+  "Львів, IT-кластер",
   "Онлайн (Zoom)",
-  "Казань, IT-Park",
-  "Новосибирск, Академгородок",
+  "Харків, Fabrika.space",
+  "Одеса, Creative Quarter",
 ];
 
 export function generateMockEvents(): IEvent[] {

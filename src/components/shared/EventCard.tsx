@@ -12,6 +12,7 @@ import { CalendarDays, MapPin, Users, UserPlus } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useEventStore } from "@/store/eventStore";
 import { toast } from "sonner";
+import ElectricBorder from "@/components/ui/electric-border";
 
 interface EventCardProps {
   event: IEvent;

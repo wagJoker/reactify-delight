@@ -38,17 +38,23 @@ export default function MyEventsPage() {
     [events, user]
   );
 
-  const renderList = (list: typeof events) =>
+  const orgPagination = usePagination(organized, { pageSize: 6 });
+  const joinPagination = usePagination(joined, { pageSize: 6 });
+
+  const renderList = (list: typeof events, pagination: ReturnType<typeof usePagination<typeof events[0]>>) =>
     isLoading ? (
       <EventGridSkeleton count={3} />
     ) : list.length === 0 ? (
-      <p className="text-center text-muted-foreground py-12">Пока ничего нет</p>
+      <p className="text-center text-muted-foreground py-12">Поки нічого немає</p>
     ) : (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((e) => (
-          <EventCard key={e.id} event={e} />
-        ))}
-      </div>
+      <>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {pagination.items.map((e) => (
+            <EventCard key={e.id} event={e} />
+          ))}
+        </div>
+        <PaginationControls page={pagination.page} totalPages={pagination.totalPages} onPageChange={pagination.goToPage} />
+      </>
     );
 
   return (

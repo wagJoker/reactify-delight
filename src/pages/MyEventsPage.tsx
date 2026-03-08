@@ -94,10 +94,10 @@ export default function MyEventsPage() {
         </TabsList>
 
         <TabsContent value="organized" className="mt-6">
-          {renderList(organized)}
+          {renderList(organized, orgPagination)}
         </TabsContent>
         <TabsContent value="joined" className="mt-6">
-          {renderList(joined)}
+          {renderList(joined, joinPagination)}
         </TabsContent>
       </Tabs>
     </div>

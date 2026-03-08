@@ -1,15 +1,14 @@
 /**
  * @module components/shared/PaginationControls
- * @description Компонент пагінації.
+ * @description Компонент пагінації зі стрілками.
  */
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationControlsProps {
   page: number;
@@ -29,10 +28,13 @@ export function PaginationControls({ page, totalPages, onPageChange }: Paginatio
     <Pagination className="mt-8">
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious
+          <button
             onClick={() => page > 1 && onPageChange(page - 1)}
-            className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          />
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors ${page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}`}
+            aria-label="Попередня"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
         </PaginationItem>
         {start > 1 && (
           <>
@@ -62,10 +64,13 @@ export function PaginationControls({ page, totalPages, onPageChange }: Paginatio
           </>
         )}
         <PaginationItem>
-          <PaginationNext
+          <button
             onClick={() => page < totalPages && onPageChange(page + 1)}
-            className={page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-          />
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors ${page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}`}
+            aria-label="Наступна"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </PaginationItem>
       </PaginationContent>
     </Pagination>

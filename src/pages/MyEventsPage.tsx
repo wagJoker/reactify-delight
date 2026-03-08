@@ -9,6 +9,8 @@ import { useEventStore } from "@/store/eventStore";
 import { useAuthStore } from "@/store/authStore";
 import { EventCard } from "@/components/shared/EventCard";
 import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
+import { PaginationControls } from "@/components/shared/PaginationControls";
+import { usePagination } from "@/hooks/usePagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { AvatarUpload } from "@/components/shared/AvatarUpload";
@@ -36,17 +38,23 @@ export default function MyEventsPage() {
     [events, user]
   );
 
-  const renderList = (list: typeof events) =>
+  const orgPagination = usePagination(organized, { pageSize: 6 });
+  const joinPagination = usePagination(joined, { pageSize: 6 });
+
+  const renderList = (list: typeof events, pagination: ReturnType<typeof usePagination<typeof events[0]>>) =>
     isLoading ? (
       <EventGridSkeleton count={3} />
     ) : list.length === 0 ? (
-      <p className="text-center text-muted-foreground py-12">Пока ничего нет</p>
+      <p className="text-center text-muted-foreground py-12">Поки нічого немає</p>
     ) : (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((e) => (
-          <EventCard key={e.id} event={e} />
-        ))}
-      </div>
+      <>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {pagination.items.map((e) => (
+            <EventCard key={e.id} event={e} />
+          ))}
+        </div>
+        <PaginationControls page={pagination.page} totalPages={pagination.totalPages} onPageChange={pagination.goToPage} />
+      </>
     );
 
   return (
@@ -86,10 +94,10 @@ export default function MyEventsPage() {
         </TabsList>
 
         <TabsContent value="organized" className="mt-6">
-          {renderList(organized)}
+          {renderList(organized, orgPagination)}
         </TabsContent>
         <TabsContent value="joined" className="mt-6">
-          {renderList(joined)}
+          {renderList(joined, joinPagination)}
         </TabsContent>
       </Tabs>
     </div>

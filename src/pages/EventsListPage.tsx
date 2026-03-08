@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useEventStore } from "@/store/eventStore";
 import { EventCard } from "@/components/shared/EventCard";
 import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
+import { PaginationControls } from "@/components/shared/PaginationControls";
+import { usePagination } from "@/hooks/usePagination";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
@@ -43,6 +45,11 @@ export default function EventsListPage() {
       return matchesSearch && matchesCategory;
     });
   }, [events, search, category]);
+
+  const { items: paginatedEvents, page, totalPages, goToPage, resetPage } = usePagination(filtered, { pageSize: 6 });
+
+  // Reset page on filter change
+  useEffect(() => { resetPage(); }, [search, category]);
 
   return (
     <div className="page-container animate-fade-in">
@@ -87,11 +94,14 @@ export default function EventsListPage() {
           <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+          <PaginationControls page={page} totalPages={totalPages} onPageChange={goToPage} />
+        </>
       )}
     </div>
   );

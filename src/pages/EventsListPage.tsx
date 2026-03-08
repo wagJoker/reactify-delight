@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useEventStore } from "@/store/eventStore";
 import { EventCard } from "@/components/shared/EventCard";
 import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
+import { PaginationControls } from "@/components/shared/PaginationControls";
+import { usePagination } from "@/hooks/usePagination";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
@@ -43,6 +45,11 @@ export default function EventsListPage() {
       return matchesSearch && matchesCategory;
     });
   }, [events, search, category]);
+
+  const { items: paginatedEvents, page, totalPages, goToPage, resetPage } = usePagination(filtered, { pageSize: 6 });
+
+  // Reset page on filter change
+  useEffect(() => { resetPage(); }, [search, category]);
 
   return (
     <div className="page-container animate-fade-in">

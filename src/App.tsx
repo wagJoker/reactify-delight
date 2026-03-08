@@ -14,6 +14,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
 // Lazy-loaded pages (code splitting)
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const EventsListPage = lazy(() => import("@/pages/EventsListPage"));
 const EventDetailsPage = lazy(() => import("@/pages/EventDetailsPage"));
@@ -33,9 +34,9 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route element={<AppLayout />}>
-              <Route path="/" element={<Navigate to="/events" replace />} />
               <Route path="/events" element={<EventsListPage />} />
               <Route path="/events/create" element={<CreateEventPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />

@@ -9,9 +9,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
 
 // Lazy-loaded pages (code splitting)
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
@@ -38,10 +39,9 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route element={<AppLayout />}>
               <Route path="/events" element={<EventsListPage />} />
-              <Route path="/events/create" element={<CreateEventPage />} />
-              <Route path="/events/:id" element={<EventDetailsPage />} />
-              <Route path="/events/:id/edit" element={<CreateEventPage />} />
-              <Route path="/my-events" element={<MyEventsPage />} />
+              <Route path="/events/create" element={<ProtectedRoute><CreateEventPage /></ProtectedRoute>} />
+              <Route path="/events/:id/edit" element={<ProtectedRoute><CreateEventPage /></ProtectedRoute>} />
+              <Route path="/my-events" element={<ProtectedRoute><MyEventsPage /></ProtectedRoute>} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/help" element={<HelpPage />} />
             </Route>

@@ -94,11 +94,14 @@ export default function EventsListPage() {
           <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+          <PaginationControls page={page} totalPages={totalPages} onPageChange={goToPage} />
+        </>
       )}
     </div>
   );

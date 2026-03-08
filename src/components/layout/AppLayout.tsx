@@ -64,12 +64,20 @@ export function AppLayout() {
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-muted-foreground hidden sm:block">
+                <Link
+                  to="/my-events"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors hidden sm:flex"
+                >
+                  <img
+                    src={user?.avatar}
+                    alt={user?.name}
+                    className="h-6 w-6 rounded-full ring-1 ring-border object-cover"
+                  />
                   {user?.name}
-                </span>
+                </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-1" />
-                  Выйти
+                  Вийти
                 </Button>
               </>
             ) : (

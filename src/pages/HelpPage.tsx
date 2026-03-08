@@ -56,10 +56,45 @@ const methodColors: Record<string, string> = {
 export default function HelpPage() {
   return (
     <div className="page-container max-w-3xl animate-fade-in">
-      <h1 className="text-3xl font-display font-bold mb-2">Помощь</h1>
+      <h1 className="text-3xl font-display font-bold mb-2">Допомога</h1>
       <p className="text-muted-foreground mb-8">
-        Часто задаваемые вопросы и API-документация
+        Опис проекту, FAQ та API-документація
       </p>
+
+      {/* Project description */}
+      <Card className="glass-card mb-8 border-primary/20">
+        <CardHeader>
+          <CardTitle className="font-display">Про проект</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+          <p>
+            <strong className="text-foreground">EventHub</strong> — веб-платформа для створення, пошуку та управління подіями в Україні. Проект створений як повноцінний SPA з акцентом на сучасний дизайн та найкращі практики розробки.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="p-3 rounded-lg bg-muted/50">
+              <p className="font-medium text-foreground text-xs mb-1">Frontend</p>
+              <p className="text-xs">React 18, TypeScript, Zustand, React Router, Tailwind CSS, shadcn/ui, Recharts, Framer Motion</p>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50">
+              <p className="font-medium text-foreground text-xs mb-1">Backend</p>
+              <p className="text-xs">NestJS, TypeORM, PostgreSQL, JWT-авторизація, Swagger/OpenAPI документація</p>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-muted/50">
+            <p className="font-medium text-foreground text-xs mb-1">Ключові можливості</p>
+            <ul className="text-xs space-y-1 list-disc list-inside">
+              <li>CRUD подій з категоріями, фільтрацією та пагінацією</li>
+              <li>Реєстрація / скасування участі з перевіркою місць</li>
+              <li>Особистий кабінет з завантаженням аватара</li>
+              <li>Профілі користувачів з аналітикою (Recharts)</li>
+              <li>Реєстрація на вебінари з Zod-валідацією</li>
+              <li>JWT-авторизація та захист маршрутів (ProtectedRoute)</li>
+              <li>Code splitting (React.lazy), skeleton loaders, анімації</li>
+              <li>Адаптивний дизайн, dark-ready дизайн-система</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* FAQ */}
       <Card className="glass-card mb-8">

@@ -11,9 +11,9 @@ import { EventCard } from "@/components/shared/EventCard";
 import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Edit, CalendarDays, Mail, User as UserIcon } from "lucide-react";
+import { Plus, CalendarDays, Mail, User as UserIcon } from "lucide-react";
 
 export default function MyEventsPage() {
   const { events, loadMockData } = useEventStore();
@@ -54,12 +54,7 @@ export default function MyEventsPage() {
       {/* Профиль пользователя */}
       <Card className="glass-card mb-8">
         <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-6">
-          <Avatar className="h-16 w-16 ring-2 ring-primary/30">
-            <AvatarImage src={user?.avatar} alt={user?.name} />
-            <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-              {user?.name?.split(" ").map((n) => n[0]).join("") ?? "?"}
-            </AvatarFallback>
-          </Avatar>
+          <AvatarUpload />
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-xl font-display font-bold">{user?.name ?? "Гость"}</h2>
             <p className="text-sm text-muted-foreground flex items-center gap-1 justify-center sm:justify-start">

@@ -62,7 +62,7 @@ export function EventCard({ event }: EventCardProps) {
         chaos={0.08}
         borderRadius={12}
         thickness={1.5}
-        className="h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="h-full [&>svg]:opacity-0 [&>svg]:group-hover:opacity-100 [&>svg]:transition-opacity [&>svg]:duration-300 [&>[aria-hidden]]:opacity-0 [&>[aria-hidden]]:group-hover:opacity-60 [&>[aria-hidden]]:transition-opacity [&>[aria-hidden]]:duration-300"
       >
         <Card className="glass-card h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-transparent hover:bg-card/95 relative overflow-hidden">
           {/* Gradient accent on hover */}

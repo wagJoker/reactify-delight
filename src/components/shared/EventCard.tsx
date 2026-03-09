@@ -8,11 +8,12 @@ import type { IEvent } from "@/types/event";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, MapPin, Users, UserPlus } from "lucide-react";
+import { CalendarDays, MapPin, Users, UserPlus, Video } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useEventStore } from "@/store/eventStore";
 import { toast } from "sonner";
 import ElectricBorder from "@/components/ui/electric-border";
+import { WebinarDialog } from "@/components/shared/WebinarDialog";
 
 interface EventCardProps {
   event: IEvent;
@@ -114,6 +115,21 @@ export function EventCard({ event }: EventCardProps) {
                 <UserPlus className="h-3.5 w-3.5 mr-1.5" />
                 {isJoined ? "Скасувати запис" : spotsLeft <= 0 ? "Місць немає" : "Записатися"}
               </Button>
+            )}
+
+            {/* Кнопка запису на вебінар */}
+            {event.category === "webinar" && (
+              <WebinarDialog>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full mt-1 transition-all duration-200"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Video className="h-3.5 w-3.5 mr-1.5" />
+                  Записатись на вебінар
+                </Button>
+              </WebinarDialog>
             )}
           </CardContent>
         </Card>

@@ -1,9 +1,8 @@
 /**
  * @module lib/api
- * @description HTTP-клієнт з JWT-авторизацією.
- * Автоматично додає Bearer token до кожного запиту.
+ * @description HTTP client with Supabase auth token.
  */
-import { useAuthStore } from "@/store/authStore";
+import { supabase } from "@/integrations/supabase/client";
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
@@ -12,12 +11,13 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
 }
 
 class ApiClient {
-  private getToken(): string | null {
-    return useAuthStore.getState().token;
+  private async getToken(): Promise<string | null> {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
   }
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const token = this.getToken();
+    const token = await this.getToken();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string>),
@@ -33,9 +33,8 @@ class ApiClient {
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
 
-    // Token expired or invalid — force logout
     if (response.status === 401) {
-      useAuthStore.getState().logout();
+      await supabase.auth.signOut();
       window.location.href = "/login";
       throw new Error("Сесія закінчилася. Увійдіть знову.");
     }
@@ -45,31 +44,15 @@ class ApiClient {
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
-    // 204 No Content
     if (response.status === 204) return {} as T;
-
     return response.json();
   }
 
-  get<T>(endpoint: string) {
-    return this.request<T>(endpoint, { method: "GET" });
-  }
-
-  post<T>(endpoint: string, body?: unknown) {
-    return this.request<T>(endpoint, { method: "POST", body });
-  }
-
-  put<T>(endpoint: string, body?: unknown) {
-    return this.request<T>(endpoint, { method: "PUT", body });
-  }
-
-  patch<T>(endpoint: string, body?: unknown) {
-    return this.request<T>(endpoint, { method: "PATCH", body });
-  }
-
-  delete<T>(endpoint: string) {
-    return this.request<T>(endpoint, { method: "DELETE" });
-  }
+  get<T>(endpoint: string) { return this.request<T>(endpoint, { method: "GET" }); }
+  post<T>(endpoint: string, body?: unknown) { return this.request<T>(endpoint, { method: "POST", body }); }
+  put<T>(endpoint: string, body?: unknown) { return this.request<T>(endpoint, { method: "PUT", body }); }
+  patch<T>(endpoint: string, body?: unknown) { return this.request<T>(endpoint, { method: "PATCH", body }); }
+  delete<T>(endpoint: string) { return this.request<T>(endpoint, { method: "DELETE" }); }
 }
 
 export const api = new ApiClient();

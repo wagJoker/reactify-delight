@@ -1,11 +1,10 @@
 /**
  * @module pages/CreateEventPage
- * @description Страница создания/редактирования события.
- * Используется для обоих сценариев (DRY принцип).
+ * @description Create/edit event page with Supabase.
  */
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEventStore } from "@/store/eventStore";
+import { useEvent, useCreateEvent, useUpdateEvent } from "@/hooks/useEvents";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,35 +12,47 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { EventCategory, CreateEventDTO } from "@/types/event";
+import type { EventCategory } from "@/types/event";
 
 const categories: { value: EventCategory; label: string }[] = [
-  { value: "conference", label: "Конференция" },
-  { value: "meetup", label: "Митап" },
+  { value: "conference", label: "Конференція" },
+  { value: "meetup", label: "Мітап" },
   { value: "workshop", label: "Воркшоп" },
-  { value: "webinar", label: "Вебинар" },
-  { value: "social", label: "Нетворкинг" },
-  { value: "other", label: "Другое" },
+  { value: "webinar", label: "Вебінар" },
+  { value: "social", label: "Нетворкінг" },
+  { value: "other", label: "Інше" },
 ];
+
+interface FormState {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  category: EventCategory;
+  max_participants: number;
+}
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { events, addEvent, updateEvent } = useEventStore();
   const { user } = useAuthStore();
+  const { data: existingEvent } = useEvent(id);
+  const createEvent = useCreateEvent();
+  const updateEvent = useUpdateEvent();
 
   const isEditing = Boolean(id);
-  const existingEvent = isEditing ? events.find((e) => e.id === id) : null;
 
-  const [form, setForm] = useState<CreateEventDTO>({
+  const [form, setForm] = useState<FormState>({
     title: "",
     description: "",
     date: "",
     time: "",
     location: "",
     category: "meetup",
-    maxParticipants: 50,
+    max_participants: 50,
   });
 
   useEffect(() => {
@@ -53,141 +64,103 @@ export default function CreateEventPage() {
         time: existingEvent.time,
         location: existingEvent.location,
         category: existingEvent.category,
-        maxParticipants: existingEvent.maxParticipants,
+        max_participants: existingEvent.max_participants,
       });
     }
   }, [existingEvent]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!form.title || !form.date || !form.time || !form.location) {
-      toast.error("Заполните обязательные поля");
+      toast.error("Заповніть обов'язкові поля");
+      return;
+    }
+    if (!user) {
+      toast.error("Увійдіть в акаунт");
       return;
     }
 
     if (isEditing && id) {
-      updateEvent(id, form);
-      toast.success("Событие обновлено");
-      navigate(`/events/${id}`);
+      updateEvent.mutate(
+        { id, ...form },
+        {
+          onSuccess: () => { toast.success("Подію оновлено"); navigate(`/events/${id}`); },
+          onError: () => toast.error("Помилка оновлення"),
+        }
+      );
     } else {
-      const newEvent = {
-        ...form,
-        id: `evt-${Date.now()}`,
-        organizerId: user?.id ?? "user-1",
-        participants: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      addEvent(newEvent);
-      toast.success("Событие создано!");
-      navigate("/events");
+      createEvent.mutate(
+        { ...form, organizer_id: user.id },
+        {
+          onSuccess: () => { toast.success("Подію створено!"); navigate("/events"); },
+          onError: () => toast.error("Помилка створення"),
+        }
+      );
     }
   };
 
-  const updateField = <K extends keyof CreateEventDTO>(key: K, value: CreateEventDTO[K]) => {
+  const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
+
+  const isPending = createEvent.isPending || updateEvent.isPending;
 
   return (
     <div className="page-container max-w-2xl animate-fade-in">
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="font-display text-2xl">
-            {isEditing ? "Редактировать событие" : "Создать событие"}
+            {isEditing ? "Редагувати подію" : "Створити подію"}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="title">Название *</Label>
-              <Input
-                id="title"
-                value={form.title}
-                onChange={(e) => updateField("title", e.target.value)}
-                placeholder="React Conf 2026"
-              />
+              <Label htmlFor="title">Назва *</Label>
+              <Input id="title" value={form.title} onChange={(e) => updateField("title", e.target.value)} placeholder="React Conf 2026" />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="description">Описание</Label>
-              <Textarea
-                id="description"
-                value={form.description}
-                onChange={(e) => updateField("description", e.target.value)}
-                placeholder="Расскажите о событии..."
-                rows={4}
-              />
+              <Label htmlFor="description">Опис</Label>
+              <Textarea id="description" value={form.description} onChange={(e) => updateField("description", e.target.value)} placeholder="Розкажіть про подію..." rows={4} />
             </div>
-
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="date">Дата *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => updateField("date", e.target.value)}
-                />
+                <Input id="date" type="date" value={form.date} onChange={(e) => updateField("date", e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">Время *</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={form.time}
-                  onChange={(e) => updateField("time", e.target.value)}
-                />
+                <Label htmlFor="time">Час *</Label>
+                <Input id="time" type="time" value={form.time} onChange={(e) => updateField("time", e.target.value)} />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="location">Место *</Label>
-              <Input
-                id="location"
-                value={form.location}
-                onChange={(e) => updateField("location", e.target.value)}
-                placeholder="Москва, Технопарк"
-              />
+              <Label htmlFor="location">Місце *</Label>
+              <Input id="location" value={form.location} onChange={(e) => updateField("location", e.target.value)} placeholder="Київ, UNIT.City" />
             </div>
-
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Категория</Label>
-                <Select
-                  value={form.category}
-                  onValueChange={(v) => updateField("category", v as EventCategory)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>Категорія</Label>
+                <Select value={form.category} onValueChange={(v) => updateField("category", v as EventCategory)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {c.label}
-                      </SelectItem>
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="max">Макс. участников</Label>
-                <Input
-                  id="max"
-                  type="number"
-                  min={1}
-                  value={form.maxParticipants}
-                  onChange={(e) => updateField("maxParticipants", Number(e.target.value))}
-                />
+                <Label htmlFor="max">Макс. учасників</Label>
+                <Input id="max" type="number" min={1} value={form.max_participants} onChange={(e) => updateField("max_participants", Number(e.target.value))} />
               </div>
             </div>
-
             <div className="flex gap-3 pt-2">
-              <Button type="submit">
-                {isEditing ? "Сохранить" : "Создать событие"}
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {isEditing ? "Зберегти" : "Створити подію"}
               </Button>
               <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-                Отмена
+                Скасувати
               </Button>
             </div>
           </form>

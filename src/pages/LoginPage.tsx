@@ -1,6 +1,6 @@
 /**
  * @module pages/LoginPage
- * @description Страница авторизации и регистрации с zod-валидацией.
+ * @description Auth page with Supabase sign in/sign up + password recovery.
  */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { LayoutDashboard, Eye, EyeOff } from "lucide-react";
+import { LayoutDashboard, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -32,12 +32,13 @@ const recoverySchema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { signIn, signUp, resetPassword } = useAuthStore();
 
-  const [loginForm, setLoginForm] = useState({ email: "oleksandr@eventhub.ua", password: "password123" });
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({ email: "", password: "", name: "" });
   const [loginErrors, setLoginErrors] = useState<Record<string, string>>({});
   const [regErrors, setRegErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegPassword, setShowRegPassword] = useState(false);
@@ -46,7 +47,7 @@ export default function LoginPage() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryError, setRecoveryError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginErrors({});
     const result = loginSchema.safeParse(loginForm);
@@ -56,21 +57,19 @@ export default function LoginPage() {
       setLoginErrors(errs);
       return;
     }
-    const savedAvatar = localStorage.getItem("user-avatar");
-    login(
-      {
-        id: "user-1",
-        email: loginForm.email,
-        name: loginForm.email === "oleksandr@eventhub.ua" ? "Олександр Шевченко" : loginForm.email.split("@")[0],
-        avatar: savedAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=Oleksandr`,
-      },
-      "mock-jwt-token"
-    );
-    toast.success("Успішний вхід!");
-    navigate("/events");
+    setIsSubmitting(true);
+    try {
+      await signIn(loginForm.email, loginForm.password);
+      toast.success("Успішний вхід!");
+      navigate("/events");
+    } catch (err: any) {
+      toast.error(err.message || "Помилка входу");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegErrors({});
     const result = registerSchema.safeParse(registerForm);
@@ -80,15 +79,19 @@ export default function LoginPage() {
       setRegErrors(errs);
       return;
     }
-    login(
-      { id: "user-1", email: registerForm.email, name: registerForm.name },
-      "mock-jwt-token"
-    );
-    toast.success("Реєстрація успішна!");
-    navigate("/events");
+    setIsSubmitting(true);
+    try {
+      await signUp(registerForm.email, registerForm.password, registerForm.name);
+      toast.success("Реєстрація успішна! Перевірте email для підтвердження.");
+      navigate("/events");
+    } catch (err: any) {
+      toast.error(err.message || "Помилка реєстрації");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRecovery = (e: React.FormEvent) => {
+  const handleRecovery = async (e: React.FormEvent) => {
     e.preventDefault();
     setRecoveryError("");
     const result = recoverySchema.safeParse({ email: recoveryEmail });
@@ -96,9 +99,14 @@ export default function LoginPage() {
       setRecoveryError(result.error.errors[0]?.message || "Помилка");
       return;
     }
-    toast.success("Інструкції для відновлення пароля надіслано на " + recoveryEmail);
-    setRecoveryOpen(false);
-    setRecoveryEmail("");
+    try {
+      await resetPassword(recoveryEmail);
+      toast.success("Інструкції для відновлення пароля надіслано на " + recoveryEmail);
+      setRecoveryOpen(false);
+      setRecoveryEmail("");
+    } catch (err: any) {
+      setRecoveryError(err.message || "Помилка");
+    }
   };
 
   return (
@@ -129,7 +137,7 @@ export default function LoginPage() {
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="oleksandr@eventhub.ua"
+                      placeholder="user@example.com"
                       value={loginForm.email}
                       onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                       className={loginErrors.email ? "border-destructive" : ""}
@@ -167,7 +175,8 @@ export default function LoginPage() {
                       Забули пароль?
                     </button>
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Увійти
                   </Button>
                 </form>
@@ -221,7 +230,8 @@ export default function LoginPage() {
                     </div>
                     {regErrors.password && <p className="text-xs text-destructive">{regErrors.password}</p>}
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Зареєструватися
                   </Button>
                 </form>

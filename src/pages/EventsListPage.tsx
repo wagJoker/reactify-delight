@@ -10,8 +10,10 @@ import { PaginationControls } from "@/components/shared/PaginationControls";
 import { usePagination } from "@/hooks/usePagination";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, Video } from "lucide-react";
 import type { EventCategory } from "@/types/event";
+import { Button } from "@/components/ui/button";
+import { WebinarDialog } from "@/components/shared/WebinarDialog";
 
 const categoryOptions: { value: EventCategory | "all"; label: string }[] = [
   { value: "all", label: "Все категории" },
@@ -54,10 +56,20 @@ export default function EventsListPage() {
   return (
     <div className="page-container animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold">События</h1>
-        <p className="text-muted-foreground mt-1">
-          Найдите интересные мероприятия и присоединяйтесь
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-display font-bold">События</h1>
+            <p className="text-muted-foreground mt-1">
+              Найдите интересные мероприятия и присоединяйтесь
+            </p>
+          </div>
+          <WebinarDialog>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              Записатись на вебінар
+            </Button>
+          </WebinarDialog>
+        </div>
       </div>
 
       {/* Filters */}

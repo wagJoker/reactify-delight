@@ -63,6 +63,12 @@ export function AppLayout() {
           )}
 
           <div className="flex items-center gap-3">
+            <WebinarDialog>
+              <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-1.5">
+                <Video className="h-4 w-4" />
+                Вебінар
+              </Button>
+            </WebinarDialog>
             {isAuthenticated ? (
               <>
                 <Link

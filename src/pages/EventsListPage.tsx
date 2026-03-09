@@ -56,10 +56,20 @@ export default function EventsListPage() {
   return (
     <div className="page-container animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold">События</h1>
-        <p className="text-muted-foreground mt-1">
-          Найдите интересные мероприятия и присоединяйтесь
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-display font-bold">События</h1>
+            <p className="text-muted-foreground mt-1">
+              Найдите интересные мероприятия и присоединяйтесь
+            </p>
+          </div>
+          <WebinarDialog>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              Записатись на вебінар
+            </Button>
+          </WebinarDialog>
+        </div>
       </div>
 
       {/* Filters */}

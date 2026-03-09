@@ -34,6 +34,11 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function HomeRedirect() {
+  const { isAuthenticated } = useAuthStore();
+  return <Navigate to={isAuthenticated ? "/events" : "/login"} replace />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

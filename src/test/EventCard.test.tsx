@@ -22,6 +22,7 @@ const mockEvent: DbEvent = {
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
   registrations: [{ user_id: "user-2" }, { user_id: "user-3" }],
+  is_cancelled: false,
 };
 
 const queryClient = new QueryClient();

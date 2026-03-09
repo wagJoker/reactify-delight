@@ -8,11 +8,12 @@ import type { IEvent } from "@/types/event";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, MapPin, Users, UserPlus } from "lucide-react";
+import { CalendarDays, MapPin, Users, UserPlus, Video } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useEventStore } from "@/store/eventStore";
 import { toast } from "sonner";
 import ElectricBorder from "@/components/ui/electric-border";
+import { WebinarDialog } from "@/components/shared/WebinarDialog";
 
 interface EventCardProps {
   event: IEvent;

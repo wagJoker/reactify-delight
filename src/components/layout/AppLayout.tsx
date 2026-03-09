@@ -7,7 +7,8 @@ import { Suspense } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, LogOut, Plus, List, HelpCircle, LayoutDashboard, UsersRound } from "lucide-react";
+import { CalendarDays, LogOut, Plus, List, HelpCircle, LayoutDashboard, UsersRound, Video } from "lucide-react";
+import { WebinarDialog } from "@/components/shared/WebinarDialog";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
 export function AppLayout() {

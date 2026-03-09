@@ -10,8 +10,10 @@ import { PaginationControls } from "@/components/shared/PaginationControls";
 import { usePagination } from "@/hooks/usePagination";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, Video } from "lucide-react";
 import type { EventCategory } from "@/types/event";
+import { Button } from "@/components/ui/button";
+import { WebinarDialog } from "@/components/shared/WebinarDialog";
 
 const categoryOptions: { value: EventCategory | "all"; label: string }[] = [
   { value: "all", label: "Все категории" },

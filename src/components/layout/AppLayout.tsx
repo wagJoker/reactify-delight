@@ -10,6 +10,7 @@ import { CalendarDays, LogOut, Plus, List, HelpCircle, LayoutDashboard, UsersRou
 import { WebinarDialog } from "@/components/shared/WebinarDialog";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { toast } from "sonner";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 
 export function AppLayout() {
   const { user, isAuthenticated, signOut } = useAuthStore();

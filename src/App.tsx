@@ -3,6 +3,7 @@
  * @description Root component with Supabase auth initialization.
  */
 import { lazy, Suspense, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";

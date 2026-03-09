@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, CalendarDays, Mail, User as UserIcon } from "lucide-react";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 
 export default function MyEventsPage() {
   const { data: events = [], isLoading } = useEvents();

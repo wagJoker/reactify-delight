@@ -116,6 +116,21 @@ export function EventCard({ event }: EventCardProps) {
                 {isJoined ? "Скасувати запис" : spotsLeft <= 0 ? "Місць немає" : "Записатися"}
               </Button>
             )}
+
+            {/* Кнопка запису на вебінар */}
+            {event.category === "webinar" && (
+              <WebinarDialog>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full mt-1 transition-all duration-200"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Video className="h-3.5 w-3.5 mr-1.5" />
+                  Записатись на вебінар
+                </Button>
+              </WebinarDialog>
+            )}
           </CardContent>
         </Card>
       </ElectricBorder>

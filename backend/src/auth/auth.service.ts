@@ -35,7 +35,7 @@ export class AuthService {
     const token = this.jwtService.sign({ sub: saved.id, email: saved.email });
 
     return {
-      user: { id: saved.id, email: saved.email, name: saved.name },
+      user: { id: saved.id, email: saved.email, name: saved.name, avatar: saved.avatar },
       token,
     };
   }
@@ -54,8 +54,16 @@ export class AuthService {
     const token = this.jwtService.sign({ sub: user.id, email: user.email });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar },
       token,
     };
+  }
+
+  async updateAvatar(userId: string, avatarUrl: string | null) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('Пользователь не найден');
+    user.avatar = avatarUrl;
+    const saved = await this.userRepo.save(user);
+    return { id: saved.id, email: saved.email, name: saved.name, avatar: saved.avatar };
   }
 }

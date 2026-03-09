@@ -10,6 +10,7 @@ import { CalendarDays, LogOut, Plus, List, HelpCircle, LayoutDashboard, UsersRou
 import { WebinarDialog } from "@/components/shared/WebinarDialog";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { toast } from "sonner";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 
 export function AppLayout() {
   const { user, isAuthenticated, signOut } = useAuthStore();
@@ -78,9 +79,7 @@ export function AppLayout() {
                   to="/my-events"
                   className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                    {displayName.charAt(0).toUpperCase()}
-                  </div>
+                  <AvatarUpload size="sm" editable={false} />
                   {displayName}
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>

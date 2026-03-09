@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, CalendarDays, Mail, User as UserIcon } from "lucide-react";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 
 export default function MyEventsPage() {
   const { data: events = [], isLoading } = useEvents();
@@ -54,9 +55,7 @@ export default function MyEventsPage() {
     <div className="page-container animate-fade-in">
       <Card className="glass-card mb-8">
         <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-6">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
+          <AvatarUpload size="md" />
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-xl font-display font-bold">{displayName}</h2>
             <p className="text-sm text-muted-foreground flex items-center gap-1 justify-center sm:justify-start">

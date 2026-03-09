@@ -79,9 +79,7 @@ export function AppLayout() {
                   to="/my-events"
                   className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                    {displayName.charAt(0).toUpperCase()}
-                  </div>
+                  <AvatarUpload size="sm" editable={false} />
                   {displayName}
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>

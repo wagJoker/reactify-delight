@@ -2,8 +2,9 @@
  * @module backend/auth/auth.controller
  * @description REST контроллер аутентификации с Swagger-документацией
  */
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Put, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -28,5 +29,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Put('avatar')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Обновить аватар пользователя' })
+  @ApiResponse({ status: 200, description: 'Аватар обновлен' })
+  async updateAvatar(@Body() body: { avatar: string | null }, @Req() req: any) {
+    return this.authService.updateAvatar(req.user.id, body.avatar);
   }
 }

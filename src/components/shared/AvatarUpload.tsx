@@ -1,13 +1,13 @@
 /**
  * @module components/shared/AvatarUpload
- * @description Компонент завантаження аватара з превʼю та збереженням в localStorage.
+ * @description Компонент завантаження аватара з превʼю та збереженням через API.
  */
 import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Camera, X } from "lucide-react";
+import { Camera, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
+import { api } from "@/lib/api";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -16,8 +16,30 @@ export function AvatarUpload() {
   const { user, login, token } = useAuthStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const currentAvatar = preview || user?.avatar;
+
+  const saveAvatarToServer = async (avatarUrl: string | null) => {
+    try {
+      setIsSaving(true);
+      const updatedUser = await api.put<{ id: string; email: string; name: string; avatar: string | null }>(
+        "/auth/avatar",
+        { avatar: avatarUrl }
+      );
+      if (user && token) {
+        login({ ...user, avatar: updatedUser.avatar ?? undefined }, token);
+      }
+    } catch {
+      // Fallback: save locally if server is unavailable
+      if (user && token) {
+        login({ ...user, avatar: avatarUrl ?? undefined }, token);
+      }
+      localStorage.setItem("user-avatar", avatarUrl ?? "");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,11 +58,7 @@ export function AvatarUpload() {
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
       setPreview(dataUrl);
-      // Save to localStorage and update store
-      localStorage.setItem("user-avatar", dataUrl);
-      if (user && token) {
-        login({ ...user, avatar: dataUrl }, token);
-      }
+      saveAvatarToServer(dataUrl);
       toast.success("Аватар оновлено!");
     };
     reader.readAsDataURL(file);
@@ -48,12 +66,10 @@ export function AvatarUpload() {
 
   const handleRemove = () => {
     setPreview(null);
-    localStorage.removeItem("user-avatar");
+    const defaultAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`;
+    saveAvatarToServer(null);
     if (user && token) {
-      login(
-        { ...user, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}` },
-        token
-      );
+      login({ ...user, avatar: defaultAvatar }, token);
     }
     toast.info("Аватар видалено");
   };
@@ -69,12 +85,17 @@ export function AvatarUpload() {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
+        disabled={isSaving}
         className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Змінити аватар"
       >
-        <Camera className="h-6 w-6 text-background" />
+        {isSaving ? (
+          <Loader2 className="h-6 w-6 text-background animate-spin" />
+        ) : (
+          <Camera className="h-6 w-6 text-background" />
+        )}
       </button>
-      {preview && (
+      {(preview || user?.avatar) && !isSaving && (
         <button
           type="button"
           onClick={handleRemove}

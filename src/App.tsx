@@ -42,7 +42,7 @@ const App = () => (
         <AuthInitializer>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<EventsListPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route element={<AppLayout />}>

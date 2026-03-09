@@ -1,41 +1,32 @@
 /**
  * @module pages/EventsListPage
- * @description Страница со списком событий с фильтрацией, поиском и skeleton loader.
+ * @description Events list page with Supabase data, filtering, search and pagination.
  */
-import { useEffect, useMemo, useState } from "react";
-import { useEventStore } from "@/store/eventStore";
+import { useMemo, useState, useEffect } from "react";
+import { useEvents } from "@/hooks/useEvents";
 import { EventCard } from "@/components/shared/EventCard";
 import { EventGridSkeleton } from "@/components/shared/EventCardSkeleton";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { usePagination } from "@/hooks/usePagination";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Video } from "lucide-react";
+import { Search } from "lucide-react";
 import type { EventCategory } from "@/types/event";
-import { Button } from "@/components/ui/button";
-import { WebinarDialog } from "@/components/shared/WebinarDialog";
 
 const categoryOptions: { value: EventCategory | "all"; label: string }[] = [
-  { value: "all", label: "Все категории" },
-  { value: "conference", label: "Конференции" },
-  { value: "meetup", label: "Митапы" },
-  { value: "workshop", label: "Воркшопы" },
-  { value: "webinar", label: "Вебинары" },
-  { value: "social", label: "Нетворкинг" },
-  { value: "other", label: "Другое" },
+  { value: "all", label: "Усі категорії" },
+  { value: "conference", label: "Конференції" },
+  { value: "meetup", label: "Мітапи" },
+  { value: "workshop", label: "Воркшопи" },
+  { value: "webinar", label: "Вебінари" },
+  { value: "social", label: "Нетворкінг" },
+  { value: "other", label: "Інше" },
 ];
 
 export default function EventsListPage() {
-  const { events, loadMockData } = useEventStore();
+  const { data: events = [], isLoading } = useEvents();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadMockData();
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, [loadMockData]);
 
   const filtered = useMemo(() => {
     return events.filter((e) => {
@@ -50,26 +41,15 @@ export default function EventsListPage() {
 
   const { items: paginatedEvents, page, totalPages, goToPage, resetPage } = usePagination(filtered, { pageSize: 6 });
 
-  // Reset page on filter change
   useEffect(() => { resetPage(); }, [search, category]);
 
   return (
     <div className="page-container animate-fade-in">
       <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-display font-bold">События</h1>
-            <p className="text-muted-foreground mt-1">
-              Найдите интересные мероприятия и присоединяйтесь
-            </p>
-          </div>
-          <WebinarDialog>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Video className="h-4 w-4" />
-              Записатись на вебінар
-            </Button>
-          </WebinarDialog>
-        </div>
+        <h1 className="text-3xl font-display font-bold">Події</h1>
+        <p className="text-muted-foreground mt-1">
+          Знайдіть цікаві заходи та приєднуйтесь
+        </p>
       </div>
 
       {/* Filters */}
@@ -77,7 +57,7 @@ export default function EventsListPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Поиск по названию..."
+            placeholder="Пошук за назвою..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -102,8 +82,8 @@ export default function EventsListPage() {
         <EventGridSkeleton count={6} />
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg">Событий не найдено</p>
-          <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
+          <p className="text-lg">Подій не знайдено</p>
+          <p className="text-sm mt-1">Спробуйте змінити фільтри</p>
         </div>
       ) : (
         <>

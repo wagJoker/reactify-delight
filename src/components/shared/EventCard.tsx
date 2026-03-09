@@ -1,57 +1,68 @@
 /**
  * @module components/shared/EventCard
- * @description Карточка события с эффектами hover и кнопкой записи.
- * Следует SRP — только отображение данных события.
+ * @description Event card with real DB registration.
  */
 import { Link } from "react-router-dom";
-import type { IEvent } from "@/types/event";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, MapPin, Users, UserPlus, Video } from "lucide-react";
+import { CalendarDays, MapPin, Users, UserPlus, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import { useEventStore } from "@/store/eventStore";
+import { useJoinEvent, useLeaveEvent, type DbEvent } from "@/hooks/useEvents";
 import { toast } from "sonner";
 import ElectricBorder from "@/components/ui/electric-border";
-import { WebinarDialog } from "@/components/shared/WebinarDialog";
 
 interface EventCardProps {
-  event: IEvent;
+  event: DbEvent;
 }
 
 const categoryLabels: Record<string, string> = {
-  conference: "Конференция",
-  meetup: "Митап",
+  conference: "Конференція",
+  meetup: "Мітап",
   workshop: "Воркшоп",
-  webinar: "Вебинар",
-  social: "Нетворкинг",
-  other: "Другое",
+  webinar: "Вебінар",
+  social: "Нетворкінг",
+  other: "Інше",
 };
 
 export function EventCard({ event }: EventCardProps) {
   const { user } = useAuthStore();
-  const { joinEvent, leaveEvent } = useEventStore();
-  const spotsLeft = event.maxParticipants - event.participants.length;
-  const isJoined = user ? event.participants.includes(user.id) : false;
-  const isOrganizer = user?.id === event.organizerId;
+  const joinEvent = useJoinEvent();
+  const leaveEvent = useLeaveEvent();
+
+  const participantCount = event.registrations?.length ?? 0;
+  const spotsLeft = event.max_participants - participantCount;
+  const isJoined = user ? event.registrations?.some((r) => r.user_id === user.id) : false;
+  const isOrganizer = user?.id === event.organizer_id;
+  const isMutating = joinEvent.isPending || leaveEvent.isPending;
 
   const handleRegister = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      toast.error("Войдите в аккаунт для записи");
+      toast.error("Увійдіть в акаунт для запису");
       return;
     }
     if (isJoined) {
-      leaveEvent(event.id, user.id);
-      toast.info("Вы отменили запись");
+      leaveEvent.mutate(
+        { eventId: event.id, userId: user.id },
+        {
+          onSuccess: () => toast.info("Ви скасували запис"),
+          onError: () => toast.error("Помилка при скасуванні"),
+        }
+      );
     } else {
       if (spotsLeft <= 0) {
-        toast.error("Нет свободных мест");
+        toast.error("Немає вільних місць");
         return;
       }
-      joinEvent(event.id, user.id);
-      toast.success("Вы записались на событие!");
+      joinEvent.mutate(
+        { eventId: event.id, userId: user.id },
+        {
+          onSuccess: () => toast.success("Ви записались на подію!"),
+          onError: (err) => toast.error(err.message || "Помилка при реєстрації"),
+        }
+      );
     }
   };
 
@@ -66,7 +77,6 @@ export function EventCard({ event }: EventCardProps) {
         className="h-full [&>svg]:opacity-0 [&>svg]:group-hover:opacity-100 [&>svg]:transition-opacity [&>svg]:duration-300 [&>[aria-hidden]]:opacity-0 [&>[aria-hidden]]:group-hover:opacity-60 [&>[aria-hidden]]:transition-opacity [&>[aria-hidden]]:duration-300"
       >
         <Card className="glass-card h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-transparent hover:bg-card/95 relative overflow-hidden">
-          {/* Gradient accent on hover */}
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           <CardHeader className="pb-3">
@@ -86,7 +96,7 @@ export function EventCard({ event }: EventCardProps) {
             <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CalendarDays className="h-3.5 w-3.5" />
-                {event.date} в {event.time}
+                {event.date} о {event.time}
               </span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5" />
@@ -94,7 +104,7 @@ export function EventCard({ event }: EventCardProps) {
               </span>
               <span className="flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5" />
-                {event.participants.length}/{event.maxParticipants} участників
+                {participantCount}/{event.max_participants} учасників
                 {spotsLeft <= 5 && spotsLeft > 0 && (
                   <span className="text-warning font-medium ml-1">
                     (залишилось {spotsLeft})
@@ -103,33 +113,21 @@ export function EventCard({ event }: EventCardProps) {
               </span>
             </div>
 
-            {/* Кнопка запису */}
             {!isOrganizer && (
               <Button
                 size="sm"
                 variant={isJoined ? "outline" : "default"}
                 className="w-full mt-2 transition-all duration-200"
                 onClick={handleRegister}
-                disabled={!isJoined && spotsLeft <= 0}
+                disabled={isMutating || (!isJoined && spotsLeft <= 0)}
               >
-                <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                {isMutating ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                )}
                 {isJoined ? "Скасувати запис" : spotsLeft <= 0 ? "Місць немає" : "Записатися"}
               </Button>
-            )}
-
-            {/* Кнопка запису на вебінар */}
-            {event.category === "webinar" && (
-              <WebinarDialog>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full mt-1 transition-all duration-200"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <Video className="h-3.5 w-3.5 mr-1.5" />
-                  Записатись на вебінар
-                </Button>
-              </WebinarDialog>
             )}
           </CardContent>
         </Card>

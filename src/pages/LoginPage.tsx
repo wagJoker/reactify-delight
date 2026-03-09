@@ -8,9 +8,10 @@ import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { LayoutDashboard, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -25,6 +26,10 @@ const registerSchema = z.object({
   password: z.string().min(6, "Мінімум 6 символів").max(128, "Максимум 128 символів"),
 });
 
+const recoverySchema = z.object({
+  email: z.string().trim().email("Невірний формат email"),
+});
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
@@ -33,6 +38,13 @@ export default function LoginPage() {
   const [registerForm, setRegisterForm] = useState({ email: "", password: "", name: "" });
   const [loginErrors, setLoginErrors] = useState<Record<string, string>>({});
   const [regErrors, setRegErrors] = useState<Record<string, string>>({});
+
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
+
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryError, setRecoveryError] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +88,19 @@ export default function LoginPage() {
     navigate("/events");
   };
 
+  const handleRecovery = (e: React.FormEvent) => {
+    e.preventDefault();
+    setRecoveryError("");
+    const result = recoverySchema.safeParse({ email: recoveryEmail });
+    if (!result.success) {
+      setRecoveryError(result.error.errors[0]?.message || "Помилка");
+      return;
+    }
+    toast.success("Інструкції для відновлення пароля надіслано на " + recoveryEmail);
+    setRecoveryOpen(false);
+    setRecoveryEmail("");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md animate-slide-up">
@@ -113,15 +138,34 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Пароль</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                      className={loginErrors.password ? "border-destructive" : ""}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="login-password"
+                        type={showLoginPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={loginForm.password}
+                        onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                        className={`pr-10 ${loginErrors.password ? "border-destructive" : ""}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     {loginErrors.password && <p className="text-xs text-destructive">{loginErrors.password}</p>}
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setRecoveryOpen(true)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Забули пароль?
+                    </button>
                   </div>
                   <Button type="submit" className="w-full">
                     Увійти
@@ -157,14 +201,24 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="reg-password">Пароль</Label>
-                    <Input
-                      id="reg-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={registerForm.password}
-                      onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                      className={regErrors.password ? "border-destructive" : ""}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="reg-password"
+                        type={showRegPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={registerForm.password}
+                        onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                        className={`pr-10 ${regErrors.password ? "border-destructive" : ""}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword(!showRegPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     {regErrors.password && <p className="text-xs text-destructive">{regErrors.password}</p>}
                   </div>
                   <Button type="submit" className="w-full">
@@ -176,6 +230,35 @@ export default function LoginPage() {
           </Tabs>
         </Card>
       </div>
+
+      {/* Password Recovery Dialog */}
+      <Dialog open={recoveryOpen} onOpenChange={setRecoveryOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Відновлення пароля</DialogTitle>
+            <DialogDescription>
+              Введіть email, і ми надішлемо інструкції для скидання пароля.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleRecovery} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="recovery-email">Email</Label>
+              <Input
+                id="recovery-email"
+                type="email"
+                placeholder="user@example.com"
+                value={recoveryEmail}
+                onChange={(e) => setRecoveryEmail(e.target.value)}
+                className={recoveryError ? "border-destructive" : ""}
+              />
+              {recoveryError && <p className="text-xs text-destructive">{recoveryError}</p>}
+            </div>
+            <Button type="submit" className="w-full">
+              Надіслати
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

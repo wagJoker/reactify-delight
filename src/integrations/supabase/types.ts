@@ -50,6 +50,7 @@ export type Database = {
           date: string
           description: string
           id: string
+          is_cancelled: boolean
           location: string
           max_participants: number
           organizer_id: string
@@ -63,6 +64,7 @@ export type Database = {
           date: string
           description?: string
           id?: string
+          is_cancelled?: boolean
           location?: string
           max_participants?: number
           organizer_id: string
@@ -76,6 +78,7 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          is_cancelled?: boolean
           location?: string
           max_participants?: number
           organizer_id?: string

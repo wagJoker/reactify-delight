@@ -9,7 +9,7 @@ import type { EventCategory } from "@/types/event";
 
 export type DbEvent = Tables<"events"> & {
   registrations: { user_id: string }[];
-  organizer: { display_name: string | null } | null;
+  organizer?: { display_name: string | null } | null;
 };
 
 /** Fetch all events with registration counts */
@@ -23,7 +23,7 @@ export function useEvents() {
         .order("date", { ascending: true });
 
       if (error) throw error;
-      return data as DbEvent[];
+      return (data as unknown) as DbEvent[];
     },
   });
 }

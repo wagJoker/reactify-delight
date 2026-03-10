@@ -116,6 +116,12 @@ export function EventCard({ event }: EventCardProps) {
               {event.description}
             </p>
             <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+              {event.organizer?.display_name && (
+                <span className="flex items-center gap-1.5 font-medium text-foreground/80">
+                  <UserIcon className="h-3.5 w-3.5" />
+                  {event.organizer.display_name}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <CalendarDays className="h-3.5 w-3.5" />
                 {event.date} о {event.time}

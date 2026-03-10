@@ -41,7 +41,7 @@ export function useEvent(id: string | undefined) {
         .single();
 
       if (error) throw error;
-      return data as DbEvent;
+      return (data as unknown) as DbEvent;
     },
   });
 }

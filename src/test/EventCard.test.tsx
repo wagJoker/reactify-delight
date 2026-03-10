@@ -23,6 +23,7 @@ const mockEvent: DbEvent = {
   updated_at: "2026-01-01T00:00:00Z",
   registrations: [{ user_id: "user-2" }, { user_id: "user-3" }],
   is_cancelled: false,
+  organizer: { display_name: "Тарас Коваленко" },
 };
 
 const queryClient = new QueryClient();

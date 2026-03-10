@@ -9,6 +9,7 @@ import type { EventCategory } from "@/types/event";
 
 export type DbEvent = Tables<"events"> & {
   registrations: { user_id: string }[];
+  organizer?: { display_name: string | null } | null;
 };
 
 /** Fetch all events with registration counts */
@@ -18,11 +19,11 @@ export function useEvents() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*, registrations:event_registrations(user_id)")
+        .select("*, registrations:event_registrations(user_id), organizer:profiles(display_name)")
         .order("date", { ascending: true });
 
       if (error) throw error;
-      return data as DbEvent[];
+      return (data as unknown) as DbEvent[];
     },
   });
 }
@@ -35,12 +36,12 @@ export function useEvent(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*, registrations:event_registrations(user_id)")
+        .select("*, registrations:event_registrations(user_id), organizer:profiles(display_name)")
         .eq("id", id!)
         .single();
 
       if (error) throw error;
-      return data as DbEvent;
+      return (data as unknown) as DbEvent;
     },
   });
 }

@@ -36,7 +36,7 @@ export function useEvent(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*, registrations:event_registrations(user_id)")
+        .select("*, registrations:event_registrations(user_id), organizer:profiles(display_name)")
         .eq("id", id!)
         .single();
 

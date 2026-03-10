@@ -9,6 +9,7 @@ import type { EventCategory } from "@/types/event";
 
 export type DbEvent = Tables<"events"> & {
   registrations: { user_id: string }[];
+  organizer: { display_name: string | null } | null;
 };
 
 /** Fetch all events with registration counts */

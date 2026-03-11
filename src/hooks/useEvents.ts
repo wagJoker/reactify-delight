@@ -59,6 +59,7 @@ export function useCreateEvent() {
       category: EventCategory;
       max_participants: number;
       organizer_id: string;
+      visibility?: string;
     }) => {
       const { data, error } = await supabase.from("events").insert(event).select().single();
       if (error) throw error;

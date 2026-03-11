@@ -29,6 +29,9 @@ export class Event {
   @Column({ default: 'other' })
   category: string;
 
+  @Column({ default: 'public' })
+  visibility: string;
+
   @Column()
   organizerId: string;
 

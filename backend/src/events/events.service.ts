@@ -82,4 +82,13 @@ export class EventsService {
     event.participants = event.participants.filter((p) => p !== userId);
     return this.eventRepo.save(event);
   }
+
+  async findByUser(userId: string) {
+    const organized = await this.eventRepo.find({ where: { organizerId: userId } });
+    const all = await this.eventRepo.find();
+    const joined = all.filter(
+      (e) => e.participants.includes(userId) && e.organizerId !== userId,
+    );
+    return { organized, joined };
+  }
 }

@@ -1,6 +1,6 @@
 /**
  * @module pages/CreateEventPage
- * @description Create/edit event page with Supabase.
+ * @description Create/edit event page with visibility, date validation, and calendar picker.
  */
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -11,9 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Loader2, CalendarIcon, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { format, parseISO, isBefore, startOfDay } from "date-fns";
+import { uk } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import type { EventCategory } from "@/types/event";
 
 const categories: { value: EventCategory; label: string }[] = [
@@ -33,6 +39,7 @@ interface FormState {
   location: string;
   category: EventCategory;
   max_participants: number;
+  visibility: "public" | "private";
 }
 
 export default function CreateEventPage() {
@@ -53,6 +60,7 @@ export default function CreateEventPage() {
     location: "",
     category: "meetup",
     max_participants: 50,
+    visibility: "public",
   });
 
   useEffect(() => {
@@ -65,9 +73,12 @@ export default function CreateEventPage() {
         location: existingEvent.location,
         category: existingEvent.category,
         max_participants: existingEvent.max_participants,
+        visibility: (existingEvent.visibility as "public" | "private") || "public",
       });
     }
   }, [existingEvent]);
+
+  const selectedDate = form.date ? parseISO(form.date) : undefined;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +88,13 @@ export default function CreateEventPage() {
     }
     if (!user) {
       toast.error("Увійдіть в акаунт");
+      return;
+    }
+
+    // Validate date is not in the past
+    const eventDate = parseISO(form.date);
+    if (isBefore(eventDate, startOfDay(new Date()))) {
+      toast.error("Не можна створити подію в минулому");
       return;
     }
 
@@ -92,7 +110,10 @@ export default function CreateEventPage() {
       createEvent.mutate(
         { ...form, organizer_id: user.id },
         {
-          onSuccess: () => { toast.success("Подію створено!"); navigate("/events"); },
+          onSuccess: (data) => {
+            toast.success("Подію створено!");
+            navigate(`/events/${data.id}`);
+          },
           onError: () => toast.error("Помилка створення"),
         }
       );
@@ -125,8 +146,31 @@ export default function CreateEventPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="date">Дата *</Label>
-                <Input id="date" type="date" value={form.date} onChange={(e) => updateField("date", e.target.value)} />
+                <Label>Дата *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !form.date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.date ? format(parseISO(form.date), "PPP", { locale: uk }) : "Оберіть дату"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(d) => d && updateField("date", format(d, "yyyy-MM-dd"))}
+                      disabled={(date) => isBefore(date, startOfDay(new Date()))}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="time">Час *</Label>
@@ -154,6 +198,32 @@ export default function CreateEventPage() {
                 <Input id="max" type="number" min={1} value={form.max_participants} onChange={(e) => updateField("max_participants", Number(e.target.value))} />
               </div>
             </div>
+
+            {/* Visibility radio */}
+            <div className="space-y-3">
+              <Label>Видимість</Label>
+              <RadioGroup
+                value={form.visibility}
+                onValueChange={(v) => updateField("visibility", v as "public" | "private")}
+                className="flex gap-4"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="public" id="vis-public" />
+                  <Label htmlFor="vis-public" className="flex items-center gap-1.5 cursor-pointer font-normal">
+                    <Eye className="h-4 w-4 text-primary" />
+                    Публічна
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="private" id="vis-private" />
+                  <Label htmlFor="vis-private" className="flex items-center gap-1.5 cursor-pointer font-normal">
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    Приватна
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

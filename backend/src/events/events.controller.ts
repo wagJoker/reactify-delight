@@ -79,4 +79,13 @@ export class EventsController {
   async leave(@Param('id') id: string, @Req() req: any) {
     return this.eventsService.leave(id, req.user.id);
   }
+
+  @Get('users/me/events')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Получить события текущего пользователя (организованные и с участием)' })
+  @ApiResponse({ status: 200, description: 'Список событий пользователя' })
+  async getMyEvents(@Req() req: any) {
+    return this.eventsService.findByUser(req.user.id);
+  }
 }

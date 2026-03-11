@@ -57,6 +57,7 @@ export type Database = {
           time: string
           title: string
           updated_at: string
+          visibility: string
         }
         Insert: {
           category?: Database["public"]["Enums"]["event_category"]
@@ -71,6 +72,7 @@ export type Database = {
           time?: string
           title: string
           updated_at?: string
+          visibility?: string
         }
         Update: {
           category?: Database["public"]["Enums"]["event_category"]
@@ -85,6 +87,7 @@ export type Database = {
           time?: string
           title?: string
           updated_at?: string
+          visibility?: string
         }
         Relationships: []
       }

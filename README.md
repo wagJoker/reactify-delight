@@ -1,73 +1,122 @@
-# Welcome to your Lovable project
+# EventHub — Event Management Platform
 
-## Project info
+Full-stack event management application where users can create, browse, join, and manage events.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Zustand, React Query, Framer Motion
+- **Backend:** NestJS (REST API), TypeORM, PostgreSQL, Swagger (API docs)
+- **Database:** Supabase (PostgreSQL + Auth + Storage + RLS)
+- **Deployment:** Docker, Vercel, Lovable Cloud
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- 🔐 Email/password authentication with email verification
+- 📅 Event CRUD: create, read, update, delete events
+- 👥 Event registration (join/leave) with capacity limits
+- 📆 Calendar view (month & week) on My Events page
+- 🔒 Public/Private event visibility
+- 🔍 Search and category filtering
+- 👤 User profiles with avatar upload
+- 📊 Participant list with names/initials
+- ⚠️ Delete confirmation modal
+- 📅 Calendar date picker (no past dates)
+- 🗂️ Pagination with navigation controls
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+
+- Docker & Docker Compose
+- npm or bun
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Local Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install frontend dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the frontend dev server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Docker (Full Stack)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Start all services (frontend, backend, database)
+docker-compose up --build
 
-**Use GitHub Codespaces**
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:4000/api
+# Swagger docs: http://localhost:4000/api/docs
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Environment Variables
 
-## What technologies are used for this project?
+Create a `.env` file based on `.env.example`:
 
-This project is built with:
+```env
+# Frontend
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_PUBLISHABLE_KEY=<your-anon-key>
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Backend
+DATABASE_URL=postgresql://user:pass@localhost:5432/eventdb
+JWT_SECRET=your-jwt-secret
+SUPABASE_URL=<your-supabase-url>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-key>
+```
 
-## How can I deploy this project?
+### Database Seeding
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```bash
+# Seed the database with 2 test users and 3 sample events
+cd backend
+npx ts-node seed.ts
+```
 
-## Can I connect a custom domain to my Lovable project?
+**Test accounts:**
+- `alice@example.com` / `Password123!`
+- `bob@example.com` / `Password123!`
 
-Yes, you can!
+## API Endpoints
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/events` | List all events (with filters) | No |
+| GET | `/api/events/:id` | Get event details | No |
+| POST | `/api/events` | Create new event | Yes |
+| PUT | `/api/events/:id` | Update event | Yes (organizer) |
+| DELETE | `/api/events/:id` | Delete event | Yes (organizer) |
+| POST | `/api/events/:id/join` | Join event | Yes |
+| POST | `/api/events/:id/leave` | Leave event | Yes |
+| GET | `/api/events/users/me/events` | My events (organized + joined) | Yes |
+| POST | `/api/auth/register` | Register | No |
+| POST | `/api/auth/login` | Login | No |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Project Structure
+
+```
+├── src/                  # Frontend (React + Vite)
+│   ├── components/       # Reusable UI components
+│   ├── hooks/            # Custom React hooks
+│   ├── pages/            # Page components
+│   ├── store/            # Zustand stores
+│   └── types/            # TypeScript types
+├── backend/              # Backend (NestJS)
+│   └── src/
+│       ├── auth/         # Authentication module
+│       └── events/       # Events module
+├── docker/               # Docker configs
+├── supabase/             # Supabase config & migrations
+└── docker-compose.yml    # Docker Compose orchestration
+```
+
+## Deployment
+
+Deploy via [Lovable](https://lovable.dev) → Share → Publish, or self-host with Docker.

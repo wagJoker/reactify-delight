@@ -21,13 +21,18 @@ export class CreateEventDto {
   @IsString()
   time: string;
 
-  @ApiProperty({ example: 'Москва, Технопарк' })
+  @ApiProperty({ example: 'Киев, UNIT.City' })
   @IsString()
   location: string;
 
   @ApiProperty({ example: 'conference', enum: ['conference', 'meetup', 'workshop', 'webinar', 'social', 'other'] })
   @IsIn(['conference', 'meetup', 'workshop', 'webinar', 'social', 'other'])
   category: string;
+
+  @ApiProperty({ example: 'public', enum: ['public', 'private'] })
+  @IsIn(['public', 'private'])
+  @IsOptional()
+  visibility?: string;
 
   @ApiProperty({ example: 100 })
   @IsNumber()

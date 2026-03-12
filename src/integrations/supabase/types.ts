@@ -89,7 +89,15 @@ export type Database = {
           updated_at?: string
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_organizer_profiles_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

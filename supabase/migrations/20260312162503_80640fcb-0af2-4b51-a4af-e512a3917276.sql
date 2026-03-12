@@ -1,0 +1,1 @@
+ALTER TABLE public.events ADD CONSTRAINT events_organizer_profiles_fkey FOREIGN KEY (organizer_id) REFERENCES public.profiles(id);

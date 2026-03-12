@@ -19,7 +19,7 @@ export function useEvents() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*, registrations:event_registrations(user_id), organizer:profiles(display_name)")
+        .select("*, registrations:event_registrations(user_id), organizer:profiles!events_organizer_profiles_fkey(display_name)")
         .order("date", { ascending: true });
 
       if (error) throw error;
@@ -36,7 +36,7 @@ export function useEvent(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*, registrations:event_registrations(user_id), organizer:profiles(display_name)")
+        .select("*, registrations:event_registrations(user_id), organizer:profiles!events_organizer_profiles_fkey(display_name)")
         .eq("id", id!)
         .single();
 
